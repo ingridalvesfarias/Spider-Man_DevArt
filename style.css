@@ -1,0 +1,746 @@
+/* ==========================================================================
+        Spider-Man — Um Novo Dia
+   Layout do Figma: 1920 x 1080 por seção.
+
+   Toda medida é escrita em unidades de design (px do Figma) multiplicadas
+   por --u, que vale 1px quando a página tem 1920px de largura.
+
+   As seções ocupam 100% da altura da tela; por isso as posições verticais
+   são ancoradas (topo / base / centro) em vez de usarem um "top" fixo.
+   ========================================================================== */
+
+@font-face {
+  font-family: "Good Times";
+  src: url("assets/good-times.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+p,
+h1,
+h2,
+h3,
+figure {
+  margin: 0;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+html {
+  background-color: #000;
+}
+
+body {
+  container-type: inline-size;
+  /* referência para as unidades cqw */
+  background-color: #000;
+  font-family: "Poppins", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 1 unidade de design, compartilhada pelas seções */
+.hero,
+.cast {
+  --u: calc(100cqw / 1920);
+}
+
+
+/* ==========================================================================
+   SCROLLSMOOTHER
+   O plugin cria estes estilos em JS, mas declará-los aqui evita o salto
+   visual entre o primeiro paint e a inicialização do GSAP.
+   ========================================================================== */
+/* #smooth-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#smooth-content {
+  width: 100%;
+  overflow: visible;
+  will-change: transform;
+} */
+
+
+/* ==========================================================================
+   SEÇÃO 1 — HERO
+   ========================================================================== */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: #770000;
+}
+
+/* Teia: imagem em tons de cinza em overlay 30% sobre o vermelho */
+.hero__webbing {
+  position: absolute;
+  inset: 0;
+  background: url("assets/bg.webp") center bottom / cover no-repeat;
+  opacity: .3;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* SVG que só carrega o <clipPath>: não ocupa espaço na página */
+.clip-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   STAGE — div recortada pelo shape de bordas arredondadas internas.
+   Ocupa 100% da largura e 100% da altura disponíveis (menos a margem de 32u).
+   Como o clipPath está em objectBoundingBox, o recorte acompanha os dois eixos.
+
+   O plano de fundo agora é a sequência de frames desenhada no .stage__canvas
+   (ver main.js). A cor de fundo é a mesma do primeiro frame, para o caso de
+   o canvas ainda não ter pintado nada.
+   -------------------------------------------------------------------------- */
+.stage {
+  position: absolute;
+  inset: calc(32 * var(--u));
+
+  background-color: #f2f2f2;
+
+  clip-path: url(#stage-clip);
+}
+
+/* Recebe os frames; fica atrás do título, da sinopse e do selo */
+.stage__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+/* --------------------------------------------------------------------------
+   REVEAL — máscara preta que revela o trailer.
+   Nasce no centro do .stage com 0x0 e cresce (via GSAP) até 100% x 100%.
+
+   O truque da máscara: o .reveal__frame por dentro tem o tamanho FINAL desde
+   o primeiro quadro e é centralizado por conta própria. Como ele não depende
+   do tamanho do pai, o vídeo fica parado enquanto a máscara abre — em vez de
+   esticar junto.
+   -------------------------------------------------------------------------- */
+.reveal {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  background-color: #000;
+  z-index: 99;
+}
+
+.reveal__frame {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 100vw;
+  /* largura total da página */
+  height: var(--frame-h, 60vh);
+  /* altura do .stage, medida em JS */
+}
+
+.reveal__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Leve escurecida enquanto o trailer roda mudo, no modo "prévia" */
+.reveal__overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, .38);
+  pointer-events: none;
+}
+
+/* Em tela cheia o frame passa a valer a tela inteira */
+.reveal__frame:fullscreen {
+  width: 100%;
+  height: 100%;
+}
+
+
+/* --------------------------------------------------------------------------
+   PLAYER
+   -------------------------------------------------------------------------- */
+.player {
+  position: absolute;
+  inset: 0;
+
+}
+
+/* ---------- Botão grande de play ---------- */
+.player__big {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(120 * var(--u));
+  height: calc(120 * var(--u));
+  margin: calc(-60 * var(--u)) 0 0 calc(-60 * var(--u));
+
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(255, 255, 255, .92);
+  cursor: pointer;
+
+  opacity: 0;
+  /* o GSAP revela no fim da máscara */
+  transform: scale(.75);
+  pointer-events: none;
+  /* liberado pela classe .is-ready */
+  transition: color .2s ease;
+}
+
+.player__big svg {
+  width: 100%;
+  height: 100%;
+}
+
+.player__big:hover {
+  color: #fff;
+}
+
+/* Só clicável quando a máscara termina de abrir */
+.player.is-ready .player__big {
+  pointer-events: auto;
+}
+
+/* Depois do play o botão grande sai de cena */
+.player.is-playing .player__big {
+  display: none;
+}
+
+/* ---------- Barra de controles ----------
+   Centralizada e com largura limitada de propósito: o .stage é recortado por
+   um shape com um entalhe embaixo à esquerda, e uma barra de ponta a ponta
+   teria esse pedaço cortado fora. 880u mantém tudo na faixa reta do shape. */
+.player__bar {
+  position: absolute;
+  left: 50%;
+  bottom: calc(56 * var(--u));
+  transform: translateX(-50%);
+  width: calc(880 * var(--u));
+
+  display: flex;
+  align-items: center;
+  gap: calc(20 * var(--u));
+
+  padding: calc(12 * var(--u)) calc(20 * var(--u));
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: calc(50 * var(--u));
+  background-color: rgba(0, 0, 0, .55);
+  backdrop-filter: blur(calc(12 * var(--u)));
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s ease;
+}
+
+/* A barra só existe depois que o trailer começa pra valer */
+.player.is-playing .player__bar {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.player__toggle,
+.player__mute,
+.player__full {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(34 * var(--u));
+  height: calc(34 * var(--u));
+
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(255, 255, 255, .8);
+  cursor: pointer;
+  transition: color .2s ease, background-color .2s ease;
+}
+
+.player__toggle:hover,
+.player__mute:hover,
+.player__full:hover {
+  color: #fff;
+  background-color: rgba(255, 255, 255, .12);
+}
+
+.player__icon {
+  width: calc(22 * var(--u));
+  height: calc(22 * var(--u));
+}
+
+/* Só um ícone por botão fica visível de cada vez.
+   Estado padrão = rodando, então o botão mostra "pausar". */
+.player__icon--play,
+.player__icon--muted {
+  display: none;
+}
+
+.player.is-paused .player__icon--play {
+  display: block;
+}
+
+.player.is-paused .player__icon--pause {
+  display: none;
+}
+
+.player.is-muted .player__icon--sound {
+  display: none;
+}
+
+.player.is-muted .player__icon--muted {
+  display: block;
+}
+
+/* ---------- Barra de progresso ---------- */
+.player__seek {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: calc(24 * var(--u));
+  cursor: pointer;
+}
+
+.player__seek:focus-visible {
+  outline: calc(2 * var(--u)) solid rgba(255, 255, 255, .6);
+  outline-offset: calc(2 * var(--u));
+}
+
+.player__track {
+  width: 100%;
+  height: calc(4 * var(--u));
+  border-radius: calc(2 * var(--u));
+  background-color: rgba(255, 255, 255, .22);
+  overflow: hidden;
+}
+
+.player__fill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background-color: rgba(255, 255, 255, .9);
+}
+
+.player__time {
+  flex-shrink: 0;
+  font-size: calc(14 * var(--u));
+  line-height: calc(21 * var(--u));
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, .75);
+  white-space: nowrap;
+}
+
+
+/* ---------- Título + sinopse (centralizados na vertical) ---------- */
+.movie {
+  position: absolute;
+  left: calc(45 * var(--u));
+  width: calc(1766 * var(--u));
+  top: 50%;
+  margin-top: calc(-56 * var(--u));
+  /* 540 - 484, com o bloco de 153u */
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.movie__title {
+  width: calc(445 * var(--u));
+  height: calc(153 * var(--u));
+}
+
+/* --------------------------------------------------------------------------
+   Sinopse — três textos empilhados no mesmo ponto.
+   Só um fica visível por vez; a troca acontece letra a letra (ver main.js).
+   A altura da caixa acompanha o texto mais alto (o 3º), por isso os
+   parágrafos são posicionados de forma absoluta a partir do topo.
+   -------------------------------------------------------------------------- */
+.movie__texts {
+  position: relative;
+  width: calc(449 * var(--u));
+  height: calc(180 * var(--u));
+  /* 6 linhas de 30u */
+  margin-top: calc(16.5 * var(--u));
+
+  /* Animado pelo scrub: escuro sobre os frames claros, claro sobre os escuros */
+  color: rgba(0, 0, 0, .9);
+}
+
+.movie__desc {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  font-size: calc(20 * var(--u));
+  line-height: calc(30 * var(--u));
+  color: inherit;
+  /* herda a cor animada de .movie__texts */
+}
+
+/* Enquanto o GSAP não roda, só o primeiro texto aparece */
+.movie__desc[data-desc="2"],
+.movie__desc[data-desc="3"] {
+  opacity: 0;
+}
+
+/* ---------- Selo "role a página" (ancorado na base à direita) ---------- */
+.scroll-badge {
+  position: absolute;
+  right: calc(45 * var(--u));
+  bottom: calc(55.64 * var(--u));
+  width: calc(176 * var(--u));
+  height: calc(176 * var(--u));
+}
+
+.scroll-badge__ring {
+  width: 100%;
+  height: 100%;
+}
+
+.scroll-badge__hand {
+  position: absolute;
+  left: calc(50 * var(--u));
+  top: calc(45.64 * var(--u));
+  width: calc(76 * var(--u));
+  height: calc(83 * var(--u));
+}
+
+/* --------------------------------------------------------------------------
+   Elementos nos recortes (fora do shape, sobre o vermelho)
+   -------------------------------------------------------------------------- */
+
+/* ---------- Logo ---------- */
+.brand {
+  position: absolute;
+  left: calc(32 * var(--u));
+  top: calc(32 * var(--u));
+  width: calc(177 * var(--u));
+  height: calc(50 * var(--u));
+}
+
+.brand__spider {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(38 * var(--u));
+  height: calc(50 * var(--u));
+}
+
+.brand__marvel {
+  position: absolute;
+  left: calc(70 * var(--u));
+  top: calc(10 * var(--u));
+  width: calc(78 * var(--u));
+  height: calc(30 * var(--u));
+}
+
+/* ---------- Navegação ---------- */
+.nav {
+  position: absolute;
+  right: calc(32 * var(--u));
+  top: calc(32 * var(--u));
+  height: calc(56 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: calc(40 * var(--u));
+}
+
+.nav__link {
+  font-size: calc(16 * var(--u));
+  line-height: calc(24 * var(--u));
+  color: rgba(255, 255, 255, .9);
+  white-space: nowrap;
+  transition: opacity .2s ease;
+}
+
+.nav__link:hover {
+  opacity: .7;
+}
+
+.nav__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(16 * var(--u)) calc(20 * var(--u));
+  border-radius: calc(50 * var(--u));
+  background-color: rgba(255, 255, 255, .9);
+  font-size: calc(16 * var(--u));
+  line-height: calc(24 * var(--u));
+  color: rgba(0, 0, 0, .9);
+  white-space: nowrap;
+  transition: background-color .2s ease;
+}
+
+.nav__cta:hover {
+  background-color: #fff;
+}
+
+/* ---------- Lançamento (ancorado na base à esquerda) ---------- */
+.release {
+  position: absolute;
+  left: calc(32 * var(--u));
+  bottom: calc(32 * var(--u));
+}
+
+.release__label {
+  font-size: calc(20 * var(--u));
+  line-height: calc(30 * var(--u));
+  color: rgba(255, 255, 255, .75);
+  white-space: nowrap;
+}
+
+.release__date {
+  margin-top: calc(-4 * var(--u));
+  font-family: "Good Times", "Poppins", sans-serif;
+  font-size: calc(62 * var(--u));
+  line-height: calc(74 * var(--u));
+  color: rgba(255, 255, 255, .9);
+  white-space: nowrap;
+}
+
+
+/* ==========================================================================
+   SEÇÃO 2 — ELENCO
+   ========================================================================== */
+.cast {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  background-color: #000;
+}
+
+/* ---------- Coluna de texto (centralizada na vertical) ----------
+   A altura da coluna mudou (a lista passou a ter 5 nomes), então a
+   centralização virou transform em vez do margin-top calculado à mão. */
+.cast__info {
+  position: absolute;
+  left: calc(73 * var(--u));
+  top: 50%;
+  transform: translateY(-50%);
+  width: calc(333 * var(--u));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(154 * var(--u));
+}
+
+.cast__label {
+  font-family: "Good Times", "Poppins", sans-serif;
+  font-size: calc(32 * var(--u));
+  line-height: calc(38 * var(--u));
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .9);
+}
+
+/* Os cinco pares nome + papel ocupam o mesmo espaço, empilhados.
+   A caixa tem altura fixa (93u do nome + 4u de gap + 30u do papel) porque
+   os filhos são absolutos e não empurram mais o layout. */
+.cast__person {
+  position: relative;
+  width: 100%;
+  height: calc(127 * var(--u));
+}
+
+.cast__slide {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: calc(4 * var(--u));
+}
+
+/* Antes do GSAP rodar, só o primeiro par aparece */
+.cast__slide+.cast__slide {
+  opacity: 0;
+}
+
+.cast__name {
+  font-weight: 400;
+  font-size: calc(62 * var(--u));
+  line-height: calc(93 * var(--u));
+  color: rgba(255, 255, 255, .9);
+}
+
+.cast__role {
+  font-size: calc(20 * var(--u));
+  line-height: calc(30 * var(--u));
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .75);
+}
+
+/* ---------- Seletor de personagens ----------
+   "stretch" faz o indicador ter exatamente a altura da lista, qualquer que
+   seja o número de nomes — é o que permite a aranha apontar para o nome
+   certo sem nenhum número mágico. */
+.cast__picker {
+  display: flex;
+  align-items: stretch;
+  gap: calc(20 * var(--u));
+}
+
+.cast__indicator {
+  position: relative;
+  flex-shrink: 0;
+  width: calc(20 * var(--u));
+}
+
+/* Trilho apagado, de ponta a ponta */
+.cast__track,
+.cast__fill {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: calc(2 * var(--u));
+  margin-left: calc(-1 * var(--u));
+  border-radius: calc(1 * var(--u));
+}
+
+.cast__track {
+  bottom: 0;
+  background-color: rgba(255, 255, 255, .2);
+}
+
+/* Preenchimento: cresce até a posição do nome ativo */
+.cast__fill {
+  height: 0;
+  background-color: rgba(255, 255, 255, .7);
+}
+
+/* A aranha cavalga a ponta do preenchimento */
+.cast__spider {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: calc(21 * var(--u));
+  height: calc(26 * var(--u));
+  margin-left: calc(-10.5 * var(--u));
+  transform: translateY(-50%);
+}
+
+.cast__list {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: calc(20 * var(--u));
+}
+
+.cast__item {
+  font-size: calc(14 * var(--u));
+  line-height: calc(21 * var(--u));
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, .5);
+  transition: color .2s ease;
+}
+
+.cast__item--active {
+  color: rgba(255, 255, 255, .8);
+}
+
+/* ---------- Imagens ---------- */
+.cast__media {
+  position: absolute;
+  left: calc(526 * var(--u));
+  right: calc(77 * var(--u));
+  top: 15.648%;
+  /* 169 / 1080 */
+  bottom: 11.852%;
+  /* (1080 - 952) / 1080 */
+  border-radius: calc(40 * var(--u));
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   A máscara de cada foto.
+   A div cresce em altura de cima para baixo (0 → 100%) e vai revelando a
+   imagem. A imagem NÃO pode acompanhar essa altura, senão ela se espremeria
+   em vez de ser revelada — por isso ela usa --media-h, a altura final do
+   .cast__media, medida em JS.
+   -------------------------------------------------------------------------- */
+.cast__shot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+}
+
+/* A primeira já entra inteira */
+.cast__shot:first-child {
+  height: 100%;
+}
+
+.cast__shot img {
+  width: 100%;
+  height: var(--media-h, 100%);
+  object-fit: cover;
+}
+
+/* Borda por dentro, como o stroke "inside" do Figma */
+.cast__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: calc(2 * var(--u)) solid rgba(255, 255, 255, .14);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+@media (max-width: 700px) {}

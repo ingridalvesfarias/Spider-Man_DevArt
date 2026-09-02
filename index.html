@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spider-Man: Um Novo Dia</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap" rel="stylesheet" />
+
+  <!-- primeiro frame da sequência: evita o "flash" branco na entrada -->
+  <link rel="preload" as="image" href="assets/frames/ezgif-frame-001.jpg" />
+  <link rel="icon" href="./assets/favicon/spiderman-logo.png" type="favicon" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <!-- ScrollSmoother exige esta dupla de wrappers em volta de TODO o conteúdo -->
+  <div id="smooth-wrapper">
+    <div id="smooth-content">
+      <!-- ======================================================================
+       SEÇÃO 1 — HERO
+       ====================================================================== -->
+      <section class="hero">
+        <!-- Teia de fundo (bg.webp) sobre o vermelho, em mix-blend-mode: overlay -->
+        <div class="hero__webbing" aria-hidden="true"></div>
+
+        <!--
+      Shape de bordas arredondadas internas.
+      O path original (1856 x 1016) foi normalizado para valores entre 0 e 1
+      e o clipPath usa clipPathUnits="objectBoundingBox", assim ele acompanha
+      qualquer largura E qualquer altura da div .stage.
+    -->
+        <svg class="clip-defs" width="0" height="0" aria-hidden="true" focusable="false">
+          <defs>
+            <clipPath id="stage-clip" clipPathUnits="objectBoundingBox">
+              <path
+                d="M0.811961 0.037402 C0.811961 0.058058 0.821126 0.074803 0.832435 0.074803 H0.949892 C0.977565 0.074803 1 0.115785 1 0.166339 V0.908465 C1 0.959018 0.977565 1 0.949892 1 H0.181034 C0.161098 1 0.144935 0.970475 0.144935 0.934055 C0.144935 0.897635 0.128773 0.86811 0.108836 0.86811 H0.050108 C0.022434 0.86811 0 0.827128 0 0.776575 V0.155512 C0 0.104959 0.022434 0.063976 0.050108 0.063976 H0.09833 C0.108001 0.063976 0.115841 0.049655 0.115841 0.031988 C0.115841 0.014322 0.12368 0 0.133351 0 H0.791487 C0.802796 0 0.811961 0.016745 0.811961 0.037402 Z" />
+            </clipPath>
+          </defs>
+        </svg>
+
+        <!-- Div clipada pelo shape. O plano de fundo agora é a sequência de frames
+         desenhada no <canvas>, controlada pela rolagem. -->
+        <div class="reveal">
+          <div class="reveal__frame">
+            <video class="reveal__video" src="assets/trailer.mp4" muted loop playsinline autoplay preload="auto"
+              aria-label="Trailer de Spider-Man: Um Novo Dia"></video>
+
+            <div class="reveal__overlay" aria-hidden="true"></div>
+
+            <!-- ---------- Player ---------- -->
+            <div class="player">
+              <!-- Botão grande, só aparece quando a máscara chega em 100% -->
+              <button class="player__big" type="button" aria-label="Assistir ao trailer">
+                <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                  <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="2" />
+                  <path d="M40 32 L70 50 L40 68 Z" fill="currentColor" />
+                </svg>
+              </button>
+
+              <!-- Barra de controles, só aparece depois do play -->
+              <div class="player__bar">
+                <button class="player__toggle" type="button" aria-label="Pausar">
+                  <svg class="player__icon player__icon--play" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M8 5 L19 12 L8 19 Z" fill="currentColor" />
+                  </svg>
+                  <svg class="player__icon player__icon--pause" viewBox="0 0 24 24" aria-hidden="true"
+                    focusable="false">
+                    <path d="M7 5h3.5v14H7z M13.5 5H17v14h-3.5z" fill="currentColor" />
+                  </svg>
+                </button>
+
+                <div class="player__seek" role="slider" tabindex="0" aria-label="Posição do trailer" aria-valuemin="0"
+                  aria-valuemax="100" aria-valuenow="0">
+                  <div class="player__track">
+                    <div class="player__fill"></div>
+                  </div>
+                </div>
+
+                <p class="player__time">
+                  <span class="player__now">0:00</span> /
+                  <span class="player__total">0:00</span>
+                </p>
+
+                <button class="player__mute" type="button" aria-label="Desativar som">
+                  <svg class="player__icon player__icon--sound" viewBox="0 0 24 24" aria-hidden="true"
+                    focusable="false">
+                    <path d="M4 9h3.5L12 4.5v15L7.5 15H4z" fill="currentColor" />
+                    <path d="M15.5 8.5a5 5 0 0 1 0 7 M18 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor"
+                      stroke-width="1.8" stroke-linecap="round" />
+                  </svg>
+                  <svg class="player__icon player__icon--muted" viewBox="0 0 24 24" aria-hidden="true"
+                    focusable="false">
+                    <path d="M4 9h3.5L12 4.5v15L7.5 15H4z" fill="currentColor" />
+                    <path d="M16 9.5l5 5 M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="1.8"
+                      stroke-linecap="round" />
+                  </svg>
+                </button>
+
+                <button class="player__full" type="button" aria-label="Tela cheia">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M4 9V4h5 M20 9V4h-5 M4 15v5h5 M20 15v5h-5" fill="none" stroke="currentColor"
+                      stroke-width="1.8" stroke-linecap="round" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stage">
+          <canvas class="stage__canvas" aria-hidden="true"></canvas>
+
+          <!--
+        Máscara do trailer. Nasce no centro com 0x0 e cresce até cobrir o
+        .stage. O .reveal__frame por dentro já tem o tamanho final desde o
+        começo, então a div não "estica" o vídeo: só o revela.
+        O player fica aqui dentro para que o botão de tela cheia leve o
+        vídeo e os controles juntos.
+      -->
+
+          <div class="movie">
+            <img class="movie__title" src="assets/titulo-spider-man.svg" alt="Spider-Man: Um Novo Dia" width="445"
+              height="153" />
+
+            <!-- Os três parágrafos ficam empilhados no mesmo ponto; a troca é feita
+             letra a letra (SplitText) em ordem aleatória. -->
+            <div class="movie__texts">
+              <p class="movie__desc" data-desc="1">
+                É um NOVO DIA para Peter Parker. Agora, ele combate o crime em
+                tempo integral como Homem-Aranha em um mundo que não se lembra
+                dele.
+              </p>
+
+              <p class="movie__desc" data-desc="2">
+                Mas a pressão de ver seus antigos amigos seguirem em frente
+                sem ele começa a desencadear uma mudança em Peter, uma
+                transformação que ele talvez não consiga controlar.
+              </p>
+
+              <p class="movie__desc" data-desc="3">
+                Só que essa mudança pode ser justamente a única coisa capaz de
+                deter uma nova e chocante ameaça à cidade e às pessoas que ele
+                ama: um vilão poderoso que ninguém consegue ver.
+              </p>
+            </div>
+          </div>
+
+          <div class="scroll-badge" aria-hidden="true">
+            <img class="scroll-badge__ring" src="assets/texto-circular.svg" alt="" width="176" height="176" />
+            <img class="scroll-badge__hand" src="assets/mao-homem-aranha.svg" alt="" width="76" height="83" />
+          </div>
+        </div>
+
+        <!-- Elementos que ficam nos recortes, fora do shape -->
+        <a class="brand" href="#" aria-label="Marvel">
+          <img class="brand__spider" src="assets/logotipo-aranha.svg" alt="" width="38" height="50" />
+          <img class="brand__marvel" src="assets/logotipo-marvel.svg" alt="" width="78" height="30" />
+        </a>
+
+        <nav class="nav">
+          <a class="nav__link" href="#">TRAILER</a>
+          <a class="nav__cta" href="#">COMPRAR INGRESSOS</a>
+        </nav>
+
+        <div class="release">
+          <p class="release__label">LANÇAMENTO</p>
+          <p class="release__date">30/07</p>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+       SEÇÃO 2 — ELENCO
+       ====================================================================== -->
+      <section class="cast" id="elenco">
+        <div class="cast__info">
+          <p class="cast__label">elenco</p>
+
+          <!-- Os cinco pares nome + papel ficam empilhados no mesmo ponto;
+           a troca é um crossfade (ver main.js).
+           NOMES GENÉRICOS: é só trocar o texto daqui, do .cast__list e do
+           alt das imagens — o JS não tem nenhum nome escrito nele. -->
+          <div class="cast__person">
+            <div class="cast__slide">
+              <h2 class="cast__name">Tom Holland</h2>
+              <p class="cast__role">Peter Parker / Homem-Aranha</p>
+            </div>
+            <div class="cast__slide">
+              <h2 class="cast__name">Zendaya</h2>
+              <p class="cast__role">MJ</p>
+            </div>
+            <div class="cast__slide">
+              <h2 class="cast__name">Jacob Batalon</h2>
+              <p class="cast__role">Zed</p>
+            </div>
+            <div class="cast__slide">
+              <h2 class="cast__name">Michael Mando</h2>
+              <p class="cast__role">Mac Gargan / Escorpião</p>
+            </div>
+            <div class="cast__slide">
+              <h2 class="cast__name">Mark Ruffalo</h2>
+              <p class="cast__role">Bruce Banner / Hulk</p>
+            </div>
+          </div>
+
+          <div class="cast__picker">
+            <!-- Barra de progresso: trilho apagado, preenchimento e a aranha
+             que desce junto, sempre apontando para o nome ativo. -->
+            <div class="cast__indicator" aria-hidden="true">
+              <span class="cast__track"></span>
+              <span class="cast__fill"></span>
+              <img class="cast__spider" src="assets/aranha-indicador.svg" alt="" width="21" height="26" />
+            </div>
+
+            <ul class="cast__list">
+              <li class="cast__item cast__item--active" aria-current="true">
+                Peter Parker / Homem-Aranha
+              </li>
+              <li class="cast__item">MJ</li>
+              <li class="cast__item">Zed</li>
+              <li class="cast__item">Mac Gargan / Escorpião</li>
+              <li class="cast__item">Bruce Banner / Hulk</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Cada foto já nasce do tamanho final; quem cresce é a div que a
+         envolve, revelando a imagem de cima para baixo. -->
+        <figure class="cast__media">
+          <div class="cast__shot">
+            <img src="assets/elenco/img1.webp" alt="Tom Holland como Peter Parker / Homem-Aranha" />
+          </div>
+          <div class="cast__shot">
+            <img src="assets/elenco/img2.webp" alt="Zendaya como MJ" />
+          </div>
+          <div class="cast__shot">
+            <img src="assets/elenco/img3.webp" alt="Jacob Batalon como Zed" />
+          </div>
+          <div class="cast__shot">
+            <img src="assets/elenco/img4.webp" alt="Michael Mando como Mac Gargan / Escorpião" />
+          </div>
+          <div class="cast__shot">
+            <img src="assets/elenco/img5.webp" alt="Mark Ruffalo como Bruce Banner / Hulk" />
+          </div>
+        </figure>
+      </section>
+    </div>
+    <!-- /#smooth-content -->
+  </div>
+  <!-- /#smooth-wrapper -->
+
+  <!-- GSAP + plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollSmoother.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+
+  <script src="main.js"></script>
+</body>
+
+</html>
