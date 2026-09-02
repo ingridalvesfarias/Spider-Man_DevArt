@@ -58,4 +58,4 @@ Spider-Man_DevArt/
 
 Acesse: https://spider-man-dev-art.vercel.app/
 
-<img src="img/imagem do projeto.png" alt="imagem do projeto">
+<img src="./assets/img/imagem do projeto.png" alt="imagem do projeto">
