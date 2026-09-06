@@ -59,3 +59,11 @@ Spider-Man_DevArt/
 Acesse: https://spider-man-dev-art.vercel.app/
 
 <img src="./assets/img/imagem do projeto.png" alt="imagem do projeto">
+
+## Créditos
+
+O projeto foi desenvolvido acompanhando a proposta apresentada no curso DevArt, do Gustavo Campelo.
+
+🔗 Curso / projeto de referência: https://gustavocampelo.com.br/devart/
+
+📺 Vídeo de referência: https://www.youtube.com/watch?v=pPkGnao1Ttc
